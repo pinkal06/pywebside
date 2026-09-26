@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-5"><div class="container">
+  <h1 class="mb-4">Welcome, {{ request.user.profile.full_name|default:request.user.email }}</h1>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><small>Total Orders</small><strong class="fs-3">{{ total_orders }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><small>Pending Orders</small><strong class="fs-3">{{ pending_orders }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><small>Wishlist Items</small><strong class="fs-3">{{ wishlist_count }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3 h-100"><small>Total Spent</small><strong class="fs-3">₹{{ total_spent|floatformat:2 }}</strong></div></div>
+  </div>
+  <div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-primary" href="{% url 'product_list' %}">Shop Now</a><a class="btn btn-outline-primary" href="{% url 'buyer_orders' %}">My Orders</a><a class="btn btn-outline-primary" href="{% url 'wishlist' %}">Wishlist</a><a class="btn btn-outline-primary" href="{% url 'cart' %}">Cart</a><a class="btn btn-outline-primary" href="{% url 'profile' %}">Profile</a></div>
+  <div class="row g-4"><div class="col-lg-7"><div class="card p-3"><h2 class="h5">Recent Orders</h2>{% for order in recent_orders %}<div class="border-bottom py-2"><a href="{% url 'order_detail' order.pk %}">{{ order.product.title }}</a> · ₹{{ order.total_price|floatformat:2 }} <span class="badge text-bg-secondary float-end">{{ order.get_status_display }}</span></div>{% empty %}<p class="text-secondary">No orders yet.</p>{% endfor %}</div></div>
+  <div class="col-lg-5"><div class="card p-3"><h2 class="h5">Notifications</h2>{% for item in notifications %}<p class="small mb-2">{{ item.message }}</p>{% empty %}<p class="text-secondary">No notifications.</p>{% endfor %}</div></div></div>
+</div></section>
+{% endblock %}

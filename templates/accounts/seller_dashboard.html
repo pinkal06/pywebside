@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-5"><div class="container">
+  <h1 class="mb-4">Seller Dashboard</h1>
+  <div class="row g-3 mb-4"><div class="col-6 col-lg-3"><div class="card p-3"><small>Total Sales</small><strong class="fs-3">₹{{ total_sales|floatformat:2 }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><small>Total Products</small><strong class="fs-3">{{ total_products }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><small>Active Products</small><strong class="fs-3">{{ active_products }}</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="card p-3"><small>Pending Orders</small><strong class="fs-3">{{ pending_orders }}</strong></div></div>
+  </div>
+  <div class="d-flex gap-2 mb-4"><a class="btn btn-primary" href="{% url 'product_create' %}">Add Product</a><a class="btn btn-outline-primary" href="{% url 'seller_orders' %}">Orders</a><a class="btn btn-outline-primary" href="{% url 'seller_analytics' %}">Analytics</a></div>
+  <div class="card p-3"><h2 class="h5">Recent Orders</h2>{% for order in recent_orders %}<div class="border-bottom py-2">{{ order.product.title }} · ₹{{ order.total_price|floatformat:2 }} <span class="badge text-bg-secondary float-end">{{ order.get_status_display }}</span></div>{% empty %}<p class="text-secondary">No orders yet.</p>{% endfor %}</div>
+</div></section>
+{% endblock %}

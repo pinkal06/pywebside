@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">Received orders</h1>
+  {% for order in orders %}
+    <div class="card mb-3 p-3">
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'order_detail' order.pk %}"><strong>{{ order.product.title }}</strong></a>
+        <span class="badge text-bg-secondary">{{ order.get_status_display }}</span>
+      </div>
+      <div>Buyer: {{ order.buyer.profile.full_name|default:order.buyer.email }} · Quantity: {{ order.quantity }} · Total: ₹{{ order.total_price|floatformat:2 }}</div>
+      <form method="post" action="{% url 'update_order_status' order.pk %}" class="mt-2 d-flex gap-2">
+        {% csrf_token %}
+        <select name="status" class="form-select form-select-sm w-auto">
+          <option value="accepted">Accept</option>
+          <option value="rejected">Reject</option>
+          <option value="completed">Complete</option>
+          <option value="cancelled">Cancel</option>
+        </select>
+        <button class="btn btn-sm btn-primary">Update</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>No orders have been received yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

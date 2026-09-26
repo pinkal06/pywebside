@@ -1,0 +1,110 @@
+{% extends "admin_panel/base_admin.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'admin_panel:order_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Orders</a>
+      <div>
+        <h4 class="fw-bold mb-0">Order #{{ order.order_number }}</h4>
+        <small class="text-muted">Placed on {{ order.created_at|date:"M d, Y H:i" }}</small>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div>
+      <span class="badge bg-primary fs-6">{{ order.get_status_display }}</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Order Info Left -->
+    <div class="col-lg-8">
+      <!-- Item Details Card -->
+      <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+        <h6 class="fw-bold border-bottom pb-2 mb-3">Ordered Item</h6>
+        <div class="d-flex gap-3 align-items-center">
+          {% if order.product.image %}
+            <img src="{{ order.product.image.url }}" class="rounded object-fit-cover shadow-sm" style="width: 80px; height: 80px;" alt="{{ order.product.title }}">
+          {% else %}
+            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" style="width: 80px; height: 80px;">
+              <i class="bi bi-image fs-4"></i>
+            </div>
+          {% endif %}
+          <div class="flex-grow-1">
+            <h5 class="fw-bold mb-1">
+              <a href="{% url 'admin_panel:product_detail' order.product.pk %}" class="text-decoration-none text-dark">
+                {{ order.product.title }}
+              </a>
+            </h5>
+            <div class="text-muted small">Category: {{ order.product.category.name }} · Sold by: {{ order.seller.username }}</div>
+            <div class="mt-2 text-dark">
+              Quantity: <strong>{{ order.quantity }}</strong> × ₹{{ order.product.price|floatformat:2 }}
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="text-muted small">Total Price</div>
+            <div class="fs-4 fw-bold text-success">₹{{ order.total_price|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h6 class="fw-bold border-bottom pb-2 mb-3">Delivery Information</h6>
+        <p class="text-secondary mb-0">{{ order.shipping_address|linebreaksbr|default:"No shipping address entered (Standard campus pickup / local delivery)." }}</p>
+      </div>
+    </div>
+
+    <!-- Order Summary & Workflow Right -->
+    <div class="col-lg-4">
+      <!-- Status Transition Control -->
+      <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+        <h6 class="fw-bold border-bottom pb-2 mb-3">Update Order Status</h6>
+
+        {% if allowed_transitions %}
+          <form method="post" action="{% url 'admin_panel:order_status_update' order.pk %}">
+            {% csrf_token %}
+            <label class="form-label small fw-semibold text-muted">Next Allowed Step</label>
+            <select name="status" class="form-select mb-3" required>
+              <option value="">Select new status...</option>
+              {% for s in allowed_transitions %}
+                <option value="{{ s }}">{{ s|upper }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary w-100 btn-sm">Update Status & Notify Buyer</button>
+          </form>
+        {% else %}
+          <div class="alert alert-light border small text-muted mb-0">
+            This order is currently <strong>{{ order.get_status_display }}</strong> and is at a terminal status. No further state transitions allowed.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Parties Involved Card -->
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h6 class="fw-bold border-bottom pb-2 mb-3">Order Parties</h6>
+        <div class="mb-3">
+          <small class="text-muted d-block">Buyer Details</small>
+          <div class="fw-semibold">
+            <a href="{% url 'admin_panel:user_detail' order.buyer.pk %}" class="text-decoration-none">
+              {{ order.buyer.profile.full_name|default:order.buyer.username }}
+            </a>
+          </div>
+          <small class="text-muted">{{ order.buyer.email }}</small>
+        </div>
+
+        <div>
+          <small class="text-muted d-block">Seller Details</small>
+          <div class="fw-semibold">
+            <a href="{% url 'admin_panel:user_detail' order.seller.pk %}" class="text-decoration-none">
+              {{ order.seller.profile.full_name|default:order.seller.username }}
+            </a>
+          </div>
+          <small class="text-muted">{{ order.seller.email }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

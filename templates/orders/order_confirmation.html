@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<div class="container py-5 text-center"><h1>Order confirmed</h1><p>Your order has been placed successfully.</p>{% if order %}<a class="btn btn-primary" href="{% url 'order_detail' order.pk %}">View order #{{ order.pk }}</a>{% endif %} <a class="btn btn-outline-secondary" href="{% url 'buyer_orders' %}">My orders</a></div>{% endblock %}

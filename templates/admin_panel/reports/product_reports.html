@@ -1,0 +1,124 @@
+{% extends "admin_panel/base_admin.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Product Listing Reports</h4>
+      <p class="text-secondary small mb-0">Inspect user-submitted flags concerning counterfeit, prohibited, or fraudulent items.</p>
+    </div>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4 p-3">
+    <form method="get" class="row g-3 align-items-center">
+      <div class="col-md-4">
+        <select name="status" class="form-select">
+          <option value="">All Report Statuses</option>
+          {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Product Reports Table -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Reported Product</th>
+            <th>Seller</th>
+            <th>Reporter</th>
+            <th>Reason</th>
+            <th>Details / Note</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in page_obj %}
+            <tr>
+              <td>
+                <a href="{% url 'admin_panel:product_detail' r.product.pk %}" class="fw-semibold text-dark text-decoration-none">
+                  {{ r.product.title|truncatechars:30 }}
+                </a>
+              </td>
+              <td>{{ r.product.owner.username }}</td>
+              <td>{{ r.reported_by.username }}</td>
+              <td><span class="badge bg-warning-subtle text-warning-emphasis">{{ r.get_reason_display }}</span></td>
+              <td class="small text-muted">{{ r.description|truncatechars:40|default:"No description provided" }}</td>
+              <td>
+                {% if r.status == 'open' %}
+                  <span class="badge bg-danger">Open</span>
+                {% elif r.status == 'reviewing' %}
+                  <span class="badge bg-warning text-dark">Reviewing</span>
+                {% elif r.status == 'resolved' %}
+                  <span class="badge bg-success">Resolved</span>
+                {% else %}
+                  <span class="badge bg-secondary">Dismissed</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ r.created_at|date:"M d, Y" }}</td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="{% url 'admin_panel:product_detail' r.product.pk %}" class="btn btn-outline-primary" title="View product">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <form method="post" action="{% url 'admin_panel:product_report_update_status' r.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    {% if r.status != 'reviewing' %}
+                      <button name="status" value="reviewing" class="btn btn-outline-warning btn-sm" title="Mark Reviewing">Review</button>
+                    {% endif %}
+                    {% if r.status != 'resolved' %}
+                      <button name="status" value="resolved" class="btn btn-outline-success btn-sm" title="Mark Resolved">Resolve</button>
+                    {% endif %}
+                    {% if r.status != 'dismissed' %}
+                      <button name="status" value="dismissed" class="btn btn-outline-secondary btn-sm" title="Dismiss">Dismiss</button>
+                    {% endif %}
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">No product reports found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3 border-0">
+        <small class="text-muted">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} reports</small>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a></li>
+            {% endif %}
+            {% for p in page_obj.paginator.page_range %}
+              {% if page_obj.number == p %}
+                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ p }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ p }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

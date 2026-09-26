@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width: 850px"><h1>Pickup Availability</h1><p class="text-secondary">Only this public location is shown to buyers. Do not enter a private home address.</p><form method="post" class="card card-body mb-4">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Add Availability</button></form><div class="list-group">{% for item in availability %}<div class="list-group-item d-flex justify-content-between"><span>{{ item.get_weekday_display }} · {{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }} · {{ item.pickup_location }}</span><form method="post" action="{% url 'availability_delete' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Remove</button></form></div>{% empty %}<p class="text-secondary">No availability configured.</p>{% endfor %}</div></div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">My orders</h1>
+  {% for order in orders %}
+    <div class="card mb-3 p-3">
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'order_detail' order.pk %}"><strong>{{ order.product.title }}</strong></a>
+        <span class="badge text-bg-secondary">{{ order.get_status_display }}</span>
+      </div>
+      <div>Quantity: {{ order.quantity }} · Total: ₹{{ order.total_price|floatformat:2 }}</div>
+      <small class="text-secondary">Placed {{ order.created_at|date:"M j, Y, g:i a" }}</small>
+    </div>
+  {% empty %}
+    <p>You have not placed any orders yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

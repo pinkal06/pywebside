@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container auth-shell">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="auth-card">
+          <div class="auth-card-header text-center mb-4">
+            <span class="eyebrow mb-3">Welcome back</span>
+            <h2 class="mb-2">Login</h2>
+            <p class="text-muted mb-0">Sign in to continue to RetiyaBazar.</p>
+          </div>
+
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+              <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+              {{ form.username }}
+              {% if form.username.errors %}<div class="invalid-feedback d-block">{{ form.username.errors|join:', ' }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+              {{ form.password }}
+              {% if form.password.errors %}<div class="invalid-feedback d-block">{{ form.password.errors|join:', ' }}</div>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <div class="d-flex justify-content-between mt-3 small">
+              <a href="{% url 'forgot_password' %}" class="text-decoration-none">Forgot password?</a>
+              <a href="{% url 'register' %}" class="text-decoration-none">Create account</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

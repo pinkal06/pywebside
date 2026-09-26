@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block extra_head %}<script type="application/ld+json">{{ product_schema|safe }}</script>{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row g-5">
+  {% if product.image %}<div class="col-md-6"><img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.title }}"></div>{% endif %}
+  <div class="col">
+    <p class="text-secondary">{{ product.category.name }} · {{ product.get_condition_display }}</p>
+    <h1>{{ product.title }}</h1><h3 class="text-primary mb-3">₹{{ product.price|floatformat:2 }}</h3>
+    <p>{{ product.description|linebreaksbr }}</p>
+    {% if product.specifications %}<div class="card card-body mb-3"><h2 class="h6">Specifications</h2>{% for key,value in product.specifications.items %}<div class="d-flex justify-content-between border-bottom py-1"><span class="text-secondary text-capitalize">{{ key }}</span><strong>{{ value }}</strong></div>{% endfor %}</div>{% endif %}
+    <p class="text-secondary">
+      Location:
+      {% if product.location %}
+        {% if product.location|slice:":4" == "http" or "maps.google.com" in product.location or "maps.app.goo.gl" in product.location %}
+          <a href="{{ product.maps_url }}" target="_blank" rel="noreferrer" class="text-primary text-decoration-underline">Open in Google Maps</a>
+        {% else %}
+          {{ product.location }}
+        {% endif %}
+      {% else %}
+        Not specified
+      {% endif %}
+      <br>Listed by {{ product.owner.profile.full_name|default:product.owner.email }}<br>Fulfillment: {{ product.get_fulfillment_method_display }}{% if product.stock_quantity == 0 %}<br><strong class="text-danger">Sold out</strong>{% endif %}
+    </p>
+    {% if user == product.owner %}
+      <a class="btn btn-outline-primary" href="{% url 'product_update' product.pk %}">Edit</a>
+      <a class="btn btn-outline-danger" href="{% url 'product_delete' product.pk %}">Delete</a>
+      <a class="btn btn-outline-secondary" href="{% url 'conversation_list' %}"><i class="bi bi-chat"></i> View Messages</a>
+    {% else %}
+      <div class="d-flex gap-2 flex-wrap">
+        {% if product.stock_quantity > 0 %}<form method="post" action="{% url 'cart_add' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ product.get_absolute_url }}"><button class="btn btn-primary"><i class="bi bi-cart3"></i> Add to cart</button></form>
+        {% if user.is_authenticated %}<a class="btn btn-outline-primary" href="{% url 'place_order' product.pk %}">Buy now</a>{% endif %}{% else %}<span class="badge text-bg-danger align-self-center">Sold out</span>{% endif %}
+        {% if user.is_authenticated %}
+          <a class="btn btn-outline-secondary" href="{% url 'conversation_start' product.pk %}"><i class="bi bi-chat"></i> Chat with Seller</a>
+        {% else %}
+          <div class="alert alert-light border mb-0 py-2 px-3">
+            <strong>Login required to chat with seller.</strong>
+          </div>
+          <a class="btn btn-primary" href="{% url 'login' %}?next={{ product.get_absolute_url }}">Login</a>
+          <a class="btn btn-outline-primary" href="{% url 'register' %}">Create Account</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+          {% if is_wishlisted %}<form method="post" action="{% url 'wishlist_remove' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ product.get_absolute_url }}"><button class="btn btn-outline-danger" aria-label="Remove from wishlist"><i class="bi bi-heart-fill"></i> Remove from wishlist</button></form>{% else %}<form method="post" action="{% url 'wishlist_add' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ product.get_absolute_url }}"><button class="btn btn-outline-secondary" aria-label="Add to wishlist"><i class="bi bi-heart"></i> Add to wishlist</button></form>{% endif %}
+        {% else %}<a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ product.get_absolute_url }}">Login to wishlist</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div></div>
+{% endblock %}

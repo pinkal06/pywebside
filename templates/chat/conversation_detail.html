@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="chat-shell container-fluid px-0">
+  <div class="chat-layout container-fluid container-xxl">
+    <aside class="conversation-sidebar d-none d-lg-block">
+      <div class="chat-sidebar-header"><div><span class="eyebrow">Inbox</span><h1 class="h3 mb-0">Messages</h1></div></div>
+      <a href="{% url 'conversation_list' %}" class="btn btn-light w-100 mb-3"><i class="bi bi-arrow-left me-2"></i>All conversations</a>
+      <div class="conversation-item selected">
+        <div class="chat-avatar">{{ conversation.seller.profile.full_name|default:conversation.seller.email|first|upper }}</div>
+        <div class="conversation-copy"><strong>{% if user == conversation.buyer %}{{ conversation.seller.profile.full_name|default:conversation.seller.email }}{% else %}{{ conversation.buyer.profile.full_name|default:conversation.buyer.email }}{% endif %}</strong><div class="small text-secondary text-truncate">{{ conversation.product.title|default:"General conversation" }}</div></div>
+      </div>
+    </aside>
+    <main class="chat-window">
+      <header class="chat-header">
+        <a href="{% url 'conversation_list' %}" class="chat-back d-lg-none" aria-label="Back to conversations"><i class="bi bi-arrow-left"></i></a>
+        <div class="chat-avatar">{{ conversation.seller.profile.full_name|default:conversation.seller.email|first|upper }}</div>
+        <div class="chat-header-copy">
+          <strong>{% if user == conversation.buyer %}{{ conversation.seller.profile.full_name|default:conversation.seller.email }}{% else %}{{ conversation.buyer.profile.full_name|default:conversation.buyer.email }}{% endif %}</strong>
+          <small>{% if conversation.product %}{{ conversation.product.title }} · ₹{{ conversation.product.price|floatformat:0 }}{% else %}Conversation{% endif %}</small>
+        </div>
+        <div class="ms-auto d-flex gap-2">
+          {% if conversation.product %}<a class="btn btn-sm btn-outline-primary" href="{{ conversation.product.get_absolute_url }}"><i class="bi bi-box-arrow-up-right"></i><span class="d-none d-md-inline ms-1">View product</span></a>{% if user == conversation.buyer %}<a class="btn btn-sm btn-primary" href="{% url 'pickup_request' conversation.pk %}"><i class="bi bi-calendar-check"></i><span class="d-none d-md-inline ms-1">Schedule pickup</span></a>{% endif %}{% endif %}
+          <button class="btn btn-sm btn-light" aria-label="More conversation actions"><i class="bi bi-three-dots-vertical"></i></button>
+        </div>
+      </header>
+      {% if conversation.product %}
+      <a href="{{ conversation.product.get_absolute_url }}" class="chat-product-preview">
+        {% if conversation.product.image %}<img src="{{ conversation.product.image.url }}" alt="{{ conversation.product.title }}">{% else %}<span><i class="bi bi-image"></i></span>{% endif %}
+        <div><strong>{{ conversation.product.title }}</strong><small>₹{{ conversation.product.price|floatformat:2 }} · {{ conversation.product.location|default:"Location not specified" }}</small></div>
+        <i class="bi bi-chevron-right ms-auto"></i>
+      </a>
+      {% endif %}
+      <div class="message-stream" id="message-stream">
+        {% for schedule in pickup_schedules %}<div class="pickup-chat-card"><i class="bi bi-calendar-check"></i><div><strong>Pickup request</strong><small>{{ schedule.pickup_date|date:"d M Y" }} · {{ schedule.pickup_time|time:"g:i A" }} · {{ schedule.get_status_display }}</small></div><a href="{% url 'pickup_detail' schedule.pk %}">Open</a></div>{% endfor %}
+        {% regroup chat_messages by created_at|date:"d F Y" as message_days %}
+        {% for day in message_days %}
+          <div class="date-divider"><span>{{ day.grouper }}</span></div>
+          {% for message in day.list %}
+            <div class="message-row {% if message.sender_id == user.id %}outgoing{% else %}incoming{% endif %}">
+              <div class="message-bubble">
+                {% if message.message_type == "voice" %}<div class="voice-message"><audio controls preload="none" src="{{ message.audio_file.url }}"></audio><small>Voice message{% if message.audio_duration %} · {{ message.audio_duration }}s{% endif %}</small></div>{% else %}<div>{{ message.body|linebreaksbr }}</div>{% endif %}
+                <div class="message-meta">{{ message.created_at|date:"g:i A" }} {% if message.sender_id == user.id %}<span class="read-ticks {% if message.is_read %}is-read{% endif %}">{% if message.is_read %}✓✓{% else %}✓{% endif %}</span>{% endif %}</div>
+              </div>
+            </div>
+          {% empty %}<div class="chat-empty"><i class="bi bi-chat-heart"></i><p>No messages yet. Say hello.</p></div>{% endfor %}
+        {% empty %}<div class="chat-empty"><i class="bi bi-chat-heart"></i><p>No messages yet. Say hello.</p></div>{% endfor %}
+      </div>
+      <div class="quick-suggestions">{% for suggestion in quick_suggestions %}<button type="button" class="quick-suggestion">{{ suggestion }}</button>{% endfor %}</div>
+      <form method="post" enctype="multipart/form-data" class="message-composer" id="message-form">
+        {% csrf_token %}{{ form.non_field_errors }}
+        <button type="button" class="composer-icon" aria-label="Add emoji" id="emoji-button">😊</button>
+        <label class="composer-icon" aria-label="Attach voice message"><i class="bi bi-paperclip"></i>{{ form.audio_file }}</label>
+        {{ form.body }}
+        <button type="button" class="composer-icon" aria-label="Start voice recording" id="record-button"><i class="bi bi-mic-fill"></i></button><span id="recording-status" class="small text-danger d-none"></span>
+        <button type="submit" class="send-button" aria-label="Send message" {% if conversation.status != "ACTIVE" %}disabled{% endif %}><i class="bi bi-send-fill"></i></button>
+        <input type="hidden" name="audio_duration" id="audio-duration" value="0">
+      </form>
+    </main>
+  </div>
+</section>
+<script>
+const stream = document.getElementById("message-stream");
+if (stream) stream.scrollTop = stream.scrollHeight;
+const input = document.getElementById("id_body");
+const audioInput = document.getElementById("id_audio_file"), recordButton = document.getElementById("record-button"), recordingStatus = document.getElementById("recording-status"), durationInput = document.getElementById("audio-duration");
+if (audioInput) audioInput.classList.add("d-none");
+document.querySelectorAll(".quick-suggestion").forEach((button) => button.addEventListener("click", () => { input.value = button.textContent; input.focus(); }));
+document.getElementById("emoji-button")?.addEventListener("click", () => { input.value += " 😊"; input.focus(); });
+let recorder, chunks = [], startedAt, timer;
+recordButton?.addEventListener("click", async () => {
+  if (recorder?.state === "recording") { recorder.stop(); return; }
+  if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) { audioInput?.click(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    recorder = new MediaRecorder(stream); chunks = []; startedAt = Date.now();
+    recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach((track) => track.stop()); clearInterval(timer);
+      const blob = new Blob(chunks, {type: recorder.mimeType || "audio/webm"});
+      const file = new File([blob], "voice-message.webm", {type: blob.type});
+      const transfer = new DataTransfer(); transfer.items.add(file); audioInput.files = transfer.files;
+      durationInput.value = Math.min(300, Math.round((Date.now() - startedAt) / 1000)); input.value = ""; input.placeholder = "Voice message selected. Press send";
+      recordingStatus.classList.add("d-none"); recordButton.innerHTML = '<i class="bi bi-mic-fill"></i>';
+    };
+    recorder.start(); recordingStatus.classList.remove("d-none"); recordButton.innerHTML = '<i class="bi bi-stop-fill"></i>';
+    timer = setInterval(() => { const seconds = Math.round((Date.now() - startedAt) / 1000); recordingStatus.textContent = `Recording ${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`; if (seconds >= 300) recorder.stop(); }, 250);
+  } catch (error) { recordingStatus.textContent = "Microphone permission is required."; recordingStatus.classList.remove("d-none"); }
+});
+audioInput?.addEventListener("change", () => { if (audioInput.files.length) { input.value = ""; input.placeholder = "Voice message selected. Press send"; } });
+input?.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); document.getElementById("message-form").requestSubmit(); } });
+</script>
+{% endblock %}

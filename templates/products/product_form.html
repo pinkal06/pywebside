@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width:800px">
+  <h1 class="mb-4">{{ page_title }}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3 {% if field.name == 'brand' or field.name == 'material' or field.name == 'color' or field.name == 'size' or field.name == 'capacity' or field.name == 'author' or field.name == 'model_name' %}spec-field{% endif %}" data-field-name="{{ field.name }}">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.name == 'location' %}
+          <div class="form-text">Add the pickup point or paste a Google Maps live link like the one shared in your request.</div>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button class="btn btn-primary">Save product</button>
+    <a class="btn btn-link" href="{% url 'product_list' %}">Cancel</a>
+  </form>
+</div>
+<script>
+  const category = document.getElementById("id_category");
+  const fields = [...document.querySelectorAll(".spec-field")];
+
+  function shouldShowField(name, label) {
+    const lower = label || "";
+    const isBook = /(book|novel|textbook|study|notes)/i.test(lower);
+    const isElectronic = /(phone|laptop|tablet|watch|camera|speaker|headphone|electronics|tech|gadget)/i.test(lower);
+    const isBag = /(bag|backpack|tote|travel|luggage)/i.test(lower);
+    const isApparel = /(shirt|dress|jeans|fashion|clothes|apparel|saree|kurta|shoes|shoe|sandal)/i.test(lower);
+
+    if (name === "brand" || name === "material" || name === "color") return true;
+    if (name === "author") return isBook || true;
+    if (name === "model_name") return isElectronic || true;
+    if (name === "capacity") return isBag || true;
+    if (name === "size") return isApparel || true;
+    return true;
+  }
+
+  function updateSpecs() {
+    const label = category?.options[category.selectedIndex]?.text.toLowerCase() || "";
+    fields.forEach((field) => {
+      const name = field.dataset.fieldName || "";
+      const visible = shouldShowField(name, label);
+      field.hidden = !visible;
+    });
+  }
+
+  category?.addEventListener("change", updateSpecs);
+  updateSpecs();
+</script>
+{% endblock %}
+

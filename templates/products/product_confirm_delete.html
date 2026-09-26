@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<div class="container py-5" style="max-width:600px"><h1>Delete product?</h1><p>Delete “{{ product.title }}” permanently?</p><form method="post">{% csrf_token %}<button class="btn btn-danger">Delete</button> <a class="btn btn-link" href="{{ product.get_absolute_url }}">Cancel</a></form></div>{% endblock %}

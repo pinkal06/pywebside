@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}<div class="container py-5"><h1>Order #{{ order.pk }}</h1>
+<div class="card p-4"><h4>{{ order.product.title }}</h4><p>Status: <strong>{{ order.get_status_display }}</strong></p><p>Quantity: {{ order.quantity }} · Total: ₹{{ order.total_price|floatformat:2 }}</p><p><strong>Shipping address</strong><br>{{ order.shipping_address|linebreaksbr }}</p><p class="text-secondary">Placed {{ order.created_at|date:"M j, Y, g:i a" }}</p>
+{% if request.user.id == order.seller_id %}<form method="post" action="{% url 'update_order_status' order.pk %}" class="d-flex gap-2">{% csrf_token %}<select name="status" class="form-select w-auto"><option value="accepted">Accept</option><option value="rejected">Reject</option><option value="completed">Complete</option><option value="cancelled">Cancel</option></select><button class="btn btn-primary">Update status</button></form>{% endif %}
+</div></div>{% endblock %}

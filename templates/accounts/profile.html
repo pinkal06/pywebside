@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="auth-card p-4">
+          <div class="text-center mb-4">
+            {% if profile.profile_photo %}
+              <img src="{{ profile.profile_photo.url }}" alt="{{ profile.full_name }}" class="img-fluid rounded-circle profile-avatar mb-3">
+            {% else %}
+              <div class="profile-avatar-placeholder mb-3"><i class="bi bi-person-circle"></i></div>
+            {% endif %}
+            <h3 class="mb-1">{{ profile.full_name|default:user.email }}</h3>
+            <span class="badge bg-primary-subtle text-primary">{{ profile.role }}</span>
+          </div>
+          <div class="list-group list-group-flush">
+            <div class="list-group-item px-0">
+              <small class="text-muted d-block">Email</small>
+              <strong>{{ user.email }}</strong>
+            </div>
+            <div class="list-group-item px-0">
+              <small class="text-muted d-block">Mobile</small>
+              <strong>{{ profile.mobile_number|default:'Not added' }}</strong>
+            </div>
+            <div class="list-group-item px-0">
+              <small class="text-muted d-block">College</small>
+              <strong>{{ profile.college|default:'Not added' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="auth-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <span class="eyebrow">Account overview</span>
+              <h2 class="mb-0">My profile</h2>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit profile</a>
+              <a href="{% url 'change_password' %}" class="btn btn-outline-secondary btn-sm">Change password</a>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6"><div class="info-box"><span>Department</span><strong>{{ profile.department|default:'Not added' }}</strong></div></div>
+            <div class="col-md-6"><div class="info-box"><span>Semester</span><strong>{{ profile.semester|default:'Not added' }}</strong></div></div>
+            <div class="col-md-6"><div class="info-box"><span>Student ID</span><strong>{{ profile.student_id|default:'Not added' }}</strong></div></div>
+            <div class="col-md-6"><div class="info-box"><span>Location</span><strong>{{ profile.city|default:'Not added' }}, {{ profile.state|default:'' }}</strong></div></div>
+            <div class="col-md-6"><div class="info-box"><span>Email verification</span><strong>{% if profile.is_email_verified %}Verified{% else %}Pending{% endif %}</strong></div></div>
+            <div class="col-md-6"><div class="info-box"><span>Account status</span><strong>{% if profile.is_active %}Active{% else %}Inactive{% endif %}</strong></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

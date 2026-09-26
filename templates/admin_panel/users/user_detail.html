@@ -1,0 +1,194 @@
+{% extends "admin_panel/base_admin.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'admin_panel:user_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Users</a>
+      <div>
+        <h4 class="fw-bold mb-0">{{ target_user.profile.full_name|default:target_user.username }}</h4>
+        <small class="text-muted">User ID: #{{ target_user.pk }} · Member since {{ target_user.date_joined|date:"M d, Y" }}</small>
+      </div>
+    </div>
+    <div>
+      <form method="post" action="{% url 'admin_panel:user_toggle_status' target_user.pk %}" class="d-inline" onsubmit="return confirm('Are you sure you want to change this user status?');">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        {% if target_user.is_active %}
+          <button class="btn btn-danger btn-sm"><i class="bi bi-person-x me-1"></i> Deactivate Account</button>
+        {% else %}
+          <button class="btn btn-success btn-sm"><i class="bi bi-person-check me-1"></i> Activate Account</button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- User Profile Overview -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 p-4 text-center mb-4">
+        {% if target_user.profile.profile_photo %}
+          <img src="{{ target_user.profile.profile_photo.url }}" class="rounded-circle mx-auto mb-3 object-fit-cover shadow-sm" style="width: 100px; height: 100px;" alt="{{ target_user.username }}">
+        {% else %}
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 fs-2 fw-bold" style="width: 100px; height: 100px;">
+            {{ target_user.username|slice:":1"|upper }}
+          </div>
+        {% endif %}
+        <h5 class="fw-bold mb-1">{{ target_user.profile.full_name|default:target_user.username }}</h5>
+        <div class="text-muted small mb-3">{{ target_user.email }}</div>
+
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          {% if target_user.is_superuser %}
+            <span class="badge bg-dark">Super Admin</span>
+          {% elif target_user.is_staff or target_user.profile.role == 'ADMIN' %}
+            <span class="badge bg-primary">Admin</span>
+          {% elif target_user.profile.role == 'SELLER' %}
+            <span class="badge bg-success">Seller</span>
+          {% else %}
+            <span class="badge bg-secondary">Buyer</span>
+          {% endif %}
+
+          {% if target_user.is_active %}
+            <span class="badge bg-success-subtle text-success">Active</span>
+          {% else %}
+            <span class="badge bg-danger-subtle text-danger">Inactive</span>
+          {% endif %}
+
+          {% if target_user.profile.is_email_verified %}
+            <span class="badge bg-info-subtle text-info">Verified</span>
+          {% else %}
+            <span class="badge bg-warning-subtle text-warning">Unverified</span>
+          {% endif %}
+        </div>
+
+        <div class="row g-2 text-start border-top pt-3">
+          <div class="col-6">
+            <small class="text-muted d-block">Products</small>
+            <span class="fw-bold fs-5">{{ target_user.product_count }}</span>
+          </div>
+          <div class="col-6">
+            <small class="text-muted d-block">Orders Placed</small>
+            <span class="fw-bold fs-5">{{ target_user.order_count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campus / Contact Details -->
+      <div class="card border-0 shadow-sm rounded-3 p-3">
+        <h6 class="fw-bold mb-3 border-bottom pb-2">Academic & Contact Info</h6>
+        <div class="mb-2 small">
+          <span class="text-muted">Mobile:</span>
+          <span class="fw-semibold ms-1">{{ target_user.profile.mobile_number|default:"Not specified" }}</span>
+        </div>
+        <div class="mb-2 small">
+          <span class="text-muted">College:</span>
+          <span class="fw-semibold ms-1">{{ target_user.profile.college|default:"Not specified" }}</span>
+        </div>
+        <div class="mb-2 small">
+          <span class="text-muted">Department:</span>
+          <span class="fw-semibold ms-1">{{ target_user.profile.department|default:"Not specified" }}</span>
+        </div>
+        <div class="mb-2 small">
+          <span class="text-muted">Student ID:</span>
+          <span class="fw-semibold ms-1">{{ target_user.profile.student_id|default:"Not specified" }}</span>
+        </div>
+        <div class="mb-2 small">
+          <span class="text-muted">City / State:</span>
+          <span class="fw-semibold ms-1">{{ target_user.profile.city|default:"-" }}, {{ target_user.profile.state|default:"-" }}</span>
+        </div>
+        <div class="mb-2 small">
+          <span class="text-muted">Last Login:</span>
+          <span class="fw-semibold ms-1">{{ target_user.last_login|date:"M d, Y H:i"|default:"Never" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- User's Products & Orders -->
+    <div class="col-lg-8">
+      <!-- Products Listed -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Products Listed ({{ target_user.product_count }})</h6>
+          <a href="{% url 'admin_panel:product_list' %}?q={{ target_user.username }}" class="btn btn-sm btn-outline-secondary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in products %}
+                <tr>
+                  <td class="fw-semibold">{{ p.title|truncatechars:30 }}</td>
+                  <td>{{ p.category.name }}</td>
+                  <td>₹{{ p.price|floatformat:2 }}</td>
+                  <td>
+                    {% if p.status == 'active' and p.is_active %}
+                      <span class="badge bg-success-subtle text-success">Active</span>
+                    {% elif p.status == 'pending' %}
+                      <span class="badge bg-warning-subtle text-warning">Pending</span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger">{{ p.status|capfirst }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <a href="{% url 'admin_panel:product_detail' p.pk %}" class="btn btn-sm btn-outline-primary py-0 px-2">Inspect</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-3 text-muted">No products listed by this user.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0">Recent Orders ({{ target_user.order_count }})</h6>
+          <a href="{% url 'admin_panel:order_list' %}?q={{ target_user.username }}" class="btn btn-sm btn-outline-secondary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Order #</th>
+                <th>Product</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in orders %}
+                <tr>
+                  <td class="fw-semibold">#{{ o.order_number }}</td>
+                  <td>{{ o.product.title|truncatechars:30 }}</td>
+                  <td>₹{{ o.total_price|floatformat:2 }}</td>
+                  <td><span class="badge bg-info-subtle text-info">{{ o.get_status_display }}</span></td>
+                  <td class="text-end">
+                    <a href="{% url 'admin_panel:order_detail' o.pk %}" class="btn btn-sm btn-outline-primary py-0 px-2">Inspect</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-3 text-muted">No orders placed by this user.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+Hello {{ user.profile.full_name|default:user.email }},
+
+Thanks for creating your RetiyaBazar account.
+
+Please verify your email address by clicking the link below:
+
+{{ verification_url }}
+
+If you did not create this account, you can ignore this email.
+
+Regards,
+RetiyaBazar Team

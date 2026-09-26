@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">Place order</h1>
+  <div class="card p-4 shadow-sm">
+    <h4>{{ product.title }}</h4>
+    <p class="text-secondary">Price: ₹{{ product.price|floatformat:2 }}</p>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn btn-primary">Place order</button>
+      <a class="btn btn-outline-secondary" href="{{ product.get_absolute_url }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

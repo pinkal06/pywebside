@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-5"><div class="container"><h1 class="mb-4">Seller Analytics</h1>
+  <div class="row g-3 mb-4"><div class="col-md-3"><div class="card p-3"><small>Total Sales</small><strong>₹{{ total_sales|floatformat:2 }}</strong></div></div><div class="col-md-3"><div class="card p-3"><small>Total Orders</small><strong>{{ total_orders }}</strong></div></div><div class="col-md-3"><div class="card p-3"><small>Average Order Value</small><strong>₹{{ average_order_value|floatformat:2 }}</strong></div></div><div class="col-md-3"><div class="card p-3"><small>Products Sold</small><strong>{{ products_sold }}</strong></div></div></div>
+  <div class="card p-3"><h2 class="h5">Top Products</h2><div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead><tbody>{% for product in top_products %}<tr><td>{{ product.product__title }}</td><td>{{ product.units }}</td><td>₹{{ product.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3">No sales data yet.</td></tr>{% endfor %}</tbody></table></div></div>
+</div></section>
+{% endblock %}

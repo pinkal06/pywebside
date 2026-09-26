@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5"><div class="d-flex justify-content-between align-items-center mb-4"><div><h1>{{ category.name }}</h1><p class="text-secondary">{{ category.description }}</p></div><div class="d-flex gap-2 align-items-center">
+{% if user.is_authenticated and user.profile.role == 'SELLER' %}<a class="btn btn-primary" href="{% url 'product_create' %}?category={{ category.pk }}">Sell in this category</a>{% endif %}
+{% if user.is_staff %}<a class="btn btn-outline-primary" href="{% url 'category_update' category.slug %}">Edit</a> <a class="btn btn-outline-danger" href="{% url 'category_delete' category.slug %}">Delete</a>{% endif %}
+</div></div>
+<form method="get" class="row g-2 mb-4"><div class="col-md-6"><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Search this category"></div><div class="col-md-3"><select class="form-select" name="condition"><option value="">All conditions</option>{% for value,label in product_conditions %}<option value="{{ value }}" {% if request.GET.condition == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div class="col-md-3"><select class="form-select" name="sort"><option value="-created_at">Newest</option><option value="price">Price low to high</option><option value="-price">Price high to low</option></select></div><div class="col-12"><button class="btn btn-outline-primary">Filter</button></div></form>
+<div class="row g-4">{% for product in products %}<div class="col-sm-6 col-lg-4">{% include "products/_card.html" %}</div>{% empty %}<p>No products in this category yet.</p>{% endfor %}</div></div>
+{% endblock %}

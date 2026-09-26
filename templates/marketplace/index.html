@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero-section" data-reveal="fade">
+  <div class="container">
+    <div class="row align-items-center g-4 py-5">
+      <div class="col-lg-6">
+        <div class="hero-copy">
+          <span class="eyebrow">Campus marketplace</span>
+          <h1>RetiyaMarket</h1>
+          <h2>Buy. Sell. Connect.</h2>
+          <p>Discover useful products from students and sellers around you.</p>
+          <div class="d-flex flex-wrap gap-3 mt-4">
+            <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg px-4">Shop Now</a>
+            <a href="{% url 'product_create' %}" class="btn btn-outline-primary btn-lg px-4">Sell Product</a>
+          </div>
+          <div class="hero-meta mt-4 d-flex flex-wrap gap-4 text-muted small fw-medium">
+            <span><i class="bi bi-shield-check me-2"></i>Verified Sellers</span>
+            <span><i class="bi bi-people me-2"></i>Trusted Community</span>
+            <span><i class="bi bi-lightning-charge me-2"></i>Fast Deals</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-visual">
+          <div class="main-card card-shadow">
+            <div class="card-top">
+              <span class="status-dot"></span>
+              <span class="status-dot"></span>
+              <span class="status-dot"></span>
+            </div>
+            <div class="product-showcase mt-3">
+              <div class="showcase-item large-item">
+                <div class="showcase-badge">Popular</div>
+                <i class="bi bi-laptop"></i>
+              </div>
+              <div class="showcase-stack d-flex gap-3 mt-3">
+                <div class="showcase-item small-item">
+                  <i class="bi bi-book"></i>
+                </div>
+                <div class="showcase-item small-item">
+                  <i class="bi bi-bag"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" data-reveal>
+  <div class="container">
+    <div class="section-heading d-flex justify-content-between align-items-center mb-4">
+      <div><span class="eyebrow">Fresh listings</span><h3 class="mb-0">Latest Products</h3></div>
+      <a href="{% url 'product_list' %}" class="btn btn-link text-primary">View all</a>
+    </div>
+    <div class="row g-4">
+      {% for product in latest_products %}<div class="col-sm-6 col-lg-3">{% include "products/_card.html" %}</div>{% empty %}<div class="col-12"><div class="empty-state">No products found yet. <a href="{% url 'product_create' %}">Sell the first product</a>.</div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="py-5" data-reveal>
+  <div class="container">
+    <div class="section-heading d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="eyebrow">Shop by category</span>
+        <h3 class="mb-0">Browse Categories</h3>
+      </div>
+      <a href="#" class="btn btn-link text-primary">View all</a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-bag-heart"></i></div>
+          <h6>Retiya &amp; Charkha</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-bag"></i></div>
+          <h6>Clothing</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-book"></i></div>
+          <h6>Books</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-cpu"></i></div>
+          <h6>Electronics</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-house-door"></i></div>
+          <h6>Furniture</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-bag-check"></i></div>
+          <h6>Bags</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-box-seam"></i></div>
+          <h6>Hostel Essentials</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-wrench-adjustable-circle"></i></div>
+          <h6>Tools</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-palette"></i></div>
+          <h6>Art &amp; Craft</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="category-card">
+          <div class="category-icon"><i class="bi bi-bicycle"></i></div>
+          <h6>Sports &amp; Fitness</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-soft" data-reveal>
+  <div class="container">
+    <div class="section-heading d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="eyebrow">Best picks</span>
+        <h3 class="mb-0">Featured Products</h3>
+      </div>
+      <a href="#" class="btn btn-link text-primary">See more</a>
+    </div>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <article class="product-card">
+          <div class="product-image bg-gradient-orange">
+            <span class="badge product-badge">Featured</span>
+            <i class="bi bi-laptop"></i>
+          </div>
+          <div class="product-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">Electronics</span>
+              <span class="price">₹14,999</span>
+            </div>
+            <h6>Gaming Laptop</h6>
+            <div class="product-meta text-muted small">
+              <span><i class="bi bi-star-fill text-warning"></i> 4.8</span>
+              <span class="mx-2">•</span>
+              <span>18 sold</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <article class="product-card">
+          <div class="product-image bg-gradient-blue">
+            <span class="badge product-badge">Popular</span>
+            <i class="bi bi-book"></i>
+          </div>
+          <div class="product-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">Books</span>
+              <span class="price">₹499</span>
+            </div>
+            <h6>Python Programming Book</h6>
+            <div class="product-meta text-muted small">
+              <span><i class="bi bi-star-fill text-warning"></i> 4.7</span>
+              <span class="mx-2">•</span>
+              <span>88 views</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <article class="product-card">
+          <div class="product-image bg-gradient-green">
+            <span class="badge product-badge">Hot</span>
+            <i class="bi bi-bicycle"></i>
+          </div>
+          <div class="product-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">Sports</span>
+              <span class="price">₹3,299</span>
+            </div>
+            <h6>Fitness Cycle</h6>
+            <div class="product-meta text-muted small">
+              <span><i class="bi bi-star-fill text-warning"></i> 4.9</span>
+              <span class="mx-2">•</span>
+              <span>42 sold</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <article class="product-card">
+          <div class="product-image bg-gradient-pink">
+            <span class="badge product-badge">New</span>
+            <i class="bi bi-bag-heart"></i>
+          </div>
+          <div class="product-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">Bags</span>
+              <span class="price">₹1,199</span>
+            </div>
+            <h6>Campus Backpack</h6>
+            <div class="product-meta text-muted small">
+              <span><i class="bi bi-star-fill text-warning"></i> 4.6</span>
+              <span class="mx-2">•</span>
+              <span>31 sold</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="section-heading d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="eyebrow">Fresh arrivals</span>
+        <h3 class="mb-0">Latest Products</h3>
+      </div>
+      <a href="#" class="btn btn-link text-primary">Explore</a>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="mini-card">
+          <div class="mini-image bg-gradient-orange"><i class="bi bi-house-door"></i></div>
+          <div class="mini-body">
+            <span class="small text-muted">Furniture</span>
+            <h6>Study Table</h6>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="price">₹2,850</span>
+              <button class="btn btn-sm btn-primary">View</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="mini-card">
+          <div class="mini-image bg-gradient-green"><i class="bi bi-box-seam"></i></div>
+          <div class="mini-body">
+            <span class="small text-muted">Hostel Essentials</span>
+            <h6>Study Lamp</h6>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="price">₹760</span>
+              <button class="btn btn-sm btn-primary">View</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="mini-card">
+          <div class="mini-image bg-gradient-blue"><i class="bi bi-palette"></i></div>
+          <div class="mini-body">
+            <span class="small text-muted">Art &amp; Craft</span>
+            <h6>Watercolor Set</h6>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="price">₹620</span>
+              <button class="btn btn-sm btn-primary">View</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-soft">
+  <div class="container">
+    <div class="section-heading text-center mb-5">
+      <span class="eyebrow">Why choose us</span>
+      <h3 class="mb-0">Why RetiyaMarket?</h3>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+          <h6>Secure Marketplace</h6>
+          <p>Protected transactions and trusted interactions across the community.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-arrow-up-right-circle"></i></div>
+          <h6>Easy Selling</h6>
+          <p>List items in minutes and connect with interested buyers fast.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-people"></i></div>
+          <h6>Student Friendly</h6>
+          <p>Built for campus life, learning, and everyday student essentials.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-person-check"></i></div>
+          <h6>Verified Users</h6>
+          <p>Community-first trust with identity and profile-based interactions.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-wallet2"></i></div>
+          <h6>Simple Payments</h6>
+          <p>Seamless purchasing flow backed by clear order and payment status.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box text-center h-100">
+          <div class="feature-icon"><i class="bi bi-emoji-smile"></i></div>
+          <h6>Trusted Community</h6>
+          <p>Supportive, reliable commerce designed around real local communities.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

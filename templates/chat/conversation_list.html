@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="chat-shell container-fluid px-0">
+  <div class="chat-layout container-fluid container-xxl">
+    <aside class="conversation-sidebar">
+      <div class="chat-sidebar-header">
+        <div><span class="eyebrow">Inbox</span><h1 class="h3 mb-0">Messages</h1></div>
+        <a href="{% url 'product_list' %}" class="btn btn-primary btn-sm" aria-label="Find products"><i class="bi bi-plus-lg"></i></a>
+      </div>
+      <form method="get" class="chat-search mb-3">
+        <i class="bi bi-search"></i><input name="q" value="{{ query }}" class="form-control" placeholder="Search conversations" aria-label="Search conversations">
+      </form>
+      <div class="conversation-items">
+        {% for conversation in conversations %}
+          {% with other=conversation.seller %}
+          <a class="conversation-item" href="{% url 'conversation_detail' conversation.pk %}">
+            <div class="chat-avatar">{{ other.profile.full_name|default:other.email|first|upper }}</div>
+            <div class="conversation-copy">
+              <div class="d-flex justify-content-between gap-2"><strong>{% if user == conversation.buyer %}{{ conversation.seller.profile.full_name|default:conversation.seller.email }}{% else %}{{ conversation.buyer.profile.full_name|default:conversation.buyer.email }}{% endif %}</strong><small>{{ conversation.updated_at|date:"g:i A" }}</small></div>
+              <div class="small text-secondary text-truncate">{% if conversation.product %}{{ conversation.product.title }} · {% endif %}{% with last_message=conversation.latest_messages.0 %}{{ last_message.body|default:"Start a conversation" }}{% endwith %}</div>
+            </div>
+            {% if conversation.unread_count %}<span class="chat-unread">{{ conversation.unread_count }}</span>{% endif %}
+          </a>
+          {% endwith %}
+        {% empty %}
+          <div class="chat-empty"><i class="bi bi-chat-square-text"></i><h2 class="h6">No conversations yet</h2><p>Open a product and chat with its seller.</p><a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm">Browse products</a></div>
+        {% endfor %}
+      </div>
+    </aside>
+    <main class="chat-placeholder d-none d-lg-flex"><i class="bi bi-chat-square-heart"></i><h2>Select a conversation</h2><p>Your product conversations will appear here.</p></main>
+  </div>
+</section>
+{% endblock %}

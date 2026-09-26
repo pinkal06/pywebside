@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container auth-shell">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <div class="auth-card text-center">
+          <div class="auth-icon mb-4"><i class="bi bi-envelope-check"></i></div>
+          <span class="eyebrow mb-3">Almost there</span>
+          <h2 class="mb-3">Verify your email</h2>
+          <p class="text-muted mb-4">Check your inbox for the verification link before logging in.</p>
+
+          <form method="post" action="{% url 'resend_verification' %}" class="text-start">
+            {% csrf_token %}
+            {% if form %}
+              <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors|join:', ' }}</div>{% endif %}
+              <button type="submit" class="btn btn-outline-primary w-100 mt-3">Resend verification email</button>
+            {% else %}
+              <a href="{% url 'resend_verification' %}" class="btn btn-outline-primary w-100">Resend verification email</a>
+            {% endif %}
+          </form>
+
+          <a href="{% url 'login' %}" class="btn btn-link mt-2">Back to login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

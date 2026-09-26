@@ -1,0 +1,22 @@
+msgid ""
+msgstr ""
+"Language: gu\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Home"
+msgstr "હોમ"
+
+msgid "Categories"
+msgstr "કેટેગરી"
+
+msgid "Wishlist"
+msgstr "પસંદગી યાદી"
+
+msgid "Cart"
+msgstr "કાર્ટ"
+
+msgid "Messages"
+msgstr "મેસેજ"
+
+msgid "Language"
+msgstr "ભાષા"

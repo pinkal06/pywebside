@@ -1,0 +1,591 @@
+{% extends "admin_panel/base_admin.html" %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Pending Alerts Banner -->
+  {% if pending_products > 0 or total_unread_reports > 0 %}
+    <div class="alert alert-warning d-flex align-items-center justify-content-between p-3 mb-4 rounded-3 shadow-sm border-0">
+      <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
+        <div>
+          <h6 class="mb-0 fw-bold">Items Requiring Administrative Attention</h6>
+          <small class="text-muted">
+            {% if pending_products > 0 %}
+              <strong class="text-dark">{{ pending_products }}</strong> products pending approval.
+            {% endif %}
+            {% if total_unread_reports > 0 %}
+              <strong class="text-dark">{{ total_unread_reports }}</strong> unresolved moderation reports.
+            {% endif %}
+          </small>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        {% if pending_products > 0 %}
+          <a href="{% url 'admin_panel:product_list' %}?status=pending" class="btn btn-sm btn-dark">Review Products</a>
+        {% endif %}
+        {% if open_product_reports > 0 %}
+          <a href="{% url 'admin_panel:product_report_list' %}?status=open" class="btn btn-sm btn-outline-dark">Review Reports</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Primary Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Total Users</div>
+            <div class="fs-3 fw-bold mt-1">{{ total_users }}</div>
+            <div class="small text-muted mt-1">
+              <span class="text-primary fw-semibold">{{ total_buyers }}</span> buyers · 
+              <span class="text-success fw-semibold">{{ total_sellers }}</span> sellers
+            </div>
+          </div>
+          <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-4">
+            <i class="bi bi-people"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Total Products</div>
+            <div class="fs-3 fw-bold mt-1">{{ total_products }}</div>
+            <div class="small text-muted mt-1">
+              <span class="text-success fw-semibold">{{ active_products }}</span> active · 
+              <span class="text-warning fw-semibold">{{ pending_products }}</span> pending
+            </div>
+          </div>
+          <div class="bg-success-subtle text-success p-3 rounded-circle fs-4">
+            <i class="bi bi-box-seam"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Total Orders</div>
+            <div class="fs-3 fw-bold mt-1">{{ total_orders }}</div>
+            <div class="small text-muted mt-1">
+              <span class="text-warning fw-semibold">{{ pending_orders }}</span> pending · 
+              <span class="text-success fw-semibold">{{ completed_orders }}</span> completed
+            </div>
+          </div>
+          <div class="bg-info-subtle text-info p-3 rounded-circle fs-4">
+            <i class="bi bi-bag-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Revenue</div>
+            <div class="fs-3 fw-bold mt-1">₹{{ total_revenue|floatformat:2 }}</div>
+            <div class="small text-muted mt-1">
+              <span class="text-success fw-semibold">₹{{ avg_order_value|floatformat:2 }}</span> avg order
+            </div>
+          </div>
+          <div class="bg-warning-subtle text-warning p-3 rounded-circle fs-4">
+            <i class="bi bi-currency-rupee"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Active Sellers</div>
+            <div class="fs-3 fw-bold mt-1">{{ active_sellers }}</div>
+            <div class="small text-muted mt-1">Marketplace capacity</div>
+          </div>
+          <div class="bg-success-subtle text-success p-3 rounded-circle fs-4">
+            <i class="bi bi-shop"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Low Stock</div>
+            <div class="fs-3 fw-bold mt-1">{{ low_stock_products }}</div>
+            <div class="small text-muted mt-1">Items need restock</div>
+          </div>
+          <div class="bg-danger-subtle text-danger p-3 rounded-circle fs-4">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Moderation Reports</div>
+            <div class="fs-3 fw-bold mt-1">{{ total_unread_reports }}</div>
+            <div class="small text-muted mt-1">
+              <span class="text-danger fw-semibold">{{ open_product_reports }}</span> product · 
+              <span class="text-danger fw-semibold">{{ open_message_reports }}</span> chat
+            </div>
+          </div>
+          <div class="bg-danger-subtle text-danger p-3 rounded-circle fs-4">
+            <i class="bi bi-shield-exclamation"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-secondary small fw-medium">Unread Alerts</div>
+            <div class="fs-3 fw-bold mt-1">{{ unread_notifications }}</div>
+            <div class="small text-muted mt-1">System notices</div>
+          </div>
+          <div class="bg-secondary-subtle text-secondary p-3 rounded-circle fs-4">
+            <i class="bi bi-bell"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-3 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i>Activity Trends (Last 7 Days)</h6>
+          <span class="badge bg-light text-secondary">Daily Activity</span>
+        </div>
+        <div style="height: 280px;">
+          <canvas id="activityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart text-success me-2"></i>Category Distribution</h6>
+          <span class="badge bg-light text-secondary">Top Categories</span>
+        </div>
+        <div style="height: 280px; position: relative;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Sales & Order Trends -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-3 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-currency-rupee text-success me-2"></i>Sales Volume & Orders (Last 7 Days)</h6>
+          <span class="badge bg-light text-secondary">Financial Overview</span>
+        </div>
+        <div style="height: 240px;">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tables Row: Operational Overview -->
+  <div class="row g-4 mb-4">
+    <!-- Pending Products Table -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-clock-history text-warning me-2"></i>Products Pending Approval</h6>
+          <a href="{% url 'admin_panel:product_list' %}?status=pending" class="btn btn-sm btn-outline-secondary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th>Seller</th>
+                <th>Price</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in recent_pending_products %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ p.title|truncatechars:28 }}</div>
+                    <small class="text-muted">{{ p.category.name }}</small>
+                  </td>
+                  <td>{{ p.owner.username }}</td>
+                  <td>₹{{ p.price|floatformat:2 }}</td>
+                  <td class="text-end">
+                    <form method="post" action="{% url 'admin_panel:product_approve' p.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-success py-0 px-2" title="Approve">✓</button>
+                    </form>
+                    <a href="{% url 'admin_panel:product_detail' p.pk %}" class="btn btn-sm btn-outline-primary py-0 px-2">Review</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No products pending approval.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-bag-check text-info me-2"></i>Recent Orders</h6>
+          <a href="{% url 'admin_panel:order_list' %}" class="btn btn-sm btn-outline-secondary">All orders</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Order</th>
+                <th>Buyer</th>
+                <th>Status</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in recent_orders %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">#{{ order.pk }}</div>
+                    <small class="text-muted">{{ order.product.title|truncatechars:20 }}</small>
+                  </td>
+                  <td>{{ order.buyer.username }}</td>
+                  <td><span class="badge bg-light text-dark">{{ order.status }}</span></td>
+                  <td class="text-end fw-semibold">₹{{ order.total_price|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No recent orders.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-trophy text-warning me-2"></i>Top Sellers</h6>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Seller</th>
+                <th>Email</th>
+                <th class="text-end">Sales</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in top_sellers %}
+                <tr>
+                  <td class="fw-semibold">{{ seller.get_full_name|default:seller.username }}</td>
+                  <td class="small text-muted">{{ seller.email }}</td>
+                  <td class="text-end fw-semibold">₹{{ seller.sales|default:0|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="3" class="text-center py-4 text-muted">No seller sales yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-flag text-danger me-2"></i>Recent Moderation Reports</h6>
+          <a href="{% url 'admin_panel:product_report_list' %}" class="btn btn-sm btn-outline-secondary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Item / Type</th>
+                <th>Reporter</th>
+                <th>Reason</th>
+                <th class="text-end">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in recent_product_reports %}
+                <tr>
+                  <td>
+                    <span class="badge bg-light text-dark">Product</span>
+                    <span class="fw-semibold ms-1">{{ r.product.title|truncatechars:22 }}</span>
+                  </td>
+                  <td>{{ r.reported_by.username }}</td>
+                  <td><span class="badge bg-warning-subtle text-warning-emphasis">{{ r.get_reason_display }}</span></td>
+                  <td class="text-end"><span class="badge bg-danger">{{ r.status|upper }}</span></td>
+                </tr>
+              {% empty %}
+                {% for m in recent_message_reports %}
+                  <tr>
+                    <td>
+                      <span class="badge bg-light text-dark">Message #{{ m.message_id }}</span>
+                    </td>
+                    <td>{{ m.reported_by.username }}</td>
+                    <td><span class="badge bg-warning-subtle text-warning-emphasis">{{ m.get_reason_display }}</span></td>
+                    <td class="text-end"><span class="badge bg-danger">{{ m.status|upper }}</span></td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">No open reports at this time.</td>
+                  </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Low Stock Inventory</h6>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th>Seller</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in low_stock_items %}
+                <tr>
+                  <td class="fw-semibold">{{ item.title|truncatechars:24 }}</td>
+                  <td>{{ item.owner.username }}</td>
+                  <td><span class="badge bg-danger-subtle text-danger">{{ item.stock_quantity }} left</span></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="3" class="text-center py-4 text-muted">All products are well stocked.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-0">
+          <h6 class="fw-bold mb-0"><i class="bi bi-activity text-primary me-2"></i>Site Health Summary</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-secondary">Users</span>
+            <strong>{{ total_users }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-secondary">Products</span>
+            <strong>{{ total_products }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-secondary">Orders</span>
+            <strong>{{ total_orders }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-secondary">Completed</span>
+            <strong>{{ completed_orders }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-secondary">Pending approval</span>
+            <strong>{{ pending_products }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-secondary">Open reports</span>
+            <strong>{{ total_unread_reports }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Audit Logs -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
+      <h6 class="fw-bold mb-0"><i class="bi bi-journal-text text-secondary me-2"></i>Recent Administrative Activity</h6>
+      <a href="{% url 'admin_panel:audit_log_list' %}" class="btn btn-sm btn-outline-secondary">All Audit Logs</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Timestamp</th>
+            <th>Admin</th>
+            <th>Action</th>
+            <th>Object</th>
+            <th>Description</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in recent_audits %}
+            <tr>
+              <td class="text-muted small">{{ a.created_at|date:"M d, Y H:i" }}</td>
+              <td class="fw-semibold">{{ a.user.username|default:"System" }}</td>
+              <td><span class="badge bg-secondary-subtle text-secondary-emphasis">{{ a.action }}</span></td>
+              <td>{{ a.object_type }} #{{ a.object_id }}</td>
+              <td class="small">{{ a.description|truncatechars:50 }}</td>
+              <td class="text-muted small">{{ a.ip_address }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">No recent administrative activity recorded.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const dates = JSON.parse('{{ chart_dates|escapejs }}');
+  const regData = JSON.parse('{{ chart_registrations|escapejs }}');
+  const prodData = JSON.parse('{{ chart_products|escapejs }}');
+  const orderData = JSON.parse('{{ chart_orders|escapejs }}');
+  const salesData = JSON.parse('{{ chart_sales|escapejs }}');
+  const catLabels = JSON.parse('{{ chart_category_labels|escapejs }}');
+  const catData = JSON.parse('{{ chart_category_data|escapejs }}');
+
+  // Activity Chart
+  const ctxActivity = document.getElementById('activityChart');
+  if (ctxActivity) {
+    new Chart(ctxActivity, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'User Registrations',
+            data: regData,
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Products Listed',
+            data: prodData,
+            borderColor: '#10b981',
+            backgroundColor: 'transparent',
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  }
+
+  // Category Distribution
+  const ctxCategory = document.getElementById('categoryChart');
+  if (ctxCategory && catLabels.length > 0) {
+    new Chart(ctxCategory, {
+      type: 'doughnut',
+      data: {
+        labels: catLabels,
+        datasets: [{
+          data: catData,
+          backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#64748b']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+
+  // Sales Volume & Orders
+  const ctxSales = document.getElementById('salesChart');
+  if (ctxSales) {
+    new Chart(ctxSales, {
+      type: 'bar',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Orders Count',
+            data: orderData,
+            backgroundColor: 'rgba(14, 165, 233, 0.7)',
+            yAxisID: 'yOrders'
+          },
+          {
+            type: 'line',
+            label: 'Sales Revenue (₹)',
+            data: salesData,
+            borderColor: '#10b981',
+            backgroundColor: 'transparent',
+            yAxisID: 'ySales',
+            tension: 0.2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yOrders: { type: 'linear', position: 'left', beginAtZero: true, ticks: { precision: 0 } },
+          ySales: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

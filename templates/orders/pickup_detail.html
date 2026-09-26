@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width: 760px">
+  <a href="{% url 'pickup_list' %}">&larr; My pickups</a>
+  <div class="card mt-3 shadow-sm"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h3 mb-1">Pickup Request</h1>
+        <p class="text-secondary mb-0">{{ schedule.product.title }}</p>
+      </div>
+      <span class="badge text-bg-primary rounded-pill">{{ schedule.get_status_display }}</span>
+    </div>
+
+    <div class="row g-2 mb-4">
+      <div class="col-md-6"><div class="border rounded p-3"><small class="text-secondary d-block">Pickup location</small><strong>{{ schedule.pickup_location }}</strong></div></div>
+      <div class="col-md-6"><div class="border rounded p-3"><small class="text-secondary d-block">Available time</small><strong>{{ schedule.pickup_date|date:"d M Y" }} at {{ schedule.pickup_time|time:"g:i A" }}</strong></div></div>
+    </div>
+
+    <h2 class="h6 text-uppercase text-secondary">Pickup journey</h2>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+      <span class="badge text-bg-light border">1. Chat</span>
+      <span class="badge text-bg-light border">2. Pickup location</span>
+      <span class="badge text-bg-light border">3. Available time</span>
+      <span class="badge text-bg-light border">4. Confirm</span>
+      <span class="badge text-bg-light border">5. Reminder</span>
+      <span class="badge text-bg-light border">6. Completed</span>
+    </div>
+
+    {% if schedule.buyer_message %}<p><strong>Buyer message:</strong> {{ schedule.buyer_message }}</p>{% endif %}
+    {% if schedule.seller_message %}<p><strong>Seller message:</strong> {{ schedule.seller_message }}</p>{% endif %}
+
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      {% if user.id == schedule.seller_id and schedule.status == "PENDING" %}
+        <form method="post">{% csrf_token %}<button name="action" value="confirm" class="btn btn-success">Confirm</button><button name="action" value="reject" class="btn btn-outline-danger">Reject</button></form>
+      {% endif %}
+      {% if user.id == schedule.seller_id and schedule.status == "PENDING" %}
+        <form method="post" class="d-flex gap-2 align-items-center">{% csrf_token %}<input type="hidden" name="action" value="suggest"><input type="date" name="pickup_date" required><input type="time" name="pickup_time" required><button class="btn btn-outline-warning">Suggest another time</button></form>
+      {% endif %}
+      {% if user.id == schedule.buyer_id and schedule.status == "TIME_CHANGE_REQUESTED" %}
+        <form method="post">{% csrf_token %}<button name="action" value="accept_change" class="btn btn-success">Accept suggested time</button></form>
+      {% endif %}
+      {% if user.id == schedule.seller_id and schedule.status == "CONFIRMED" %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reminder"><textarea name="message" class="form-control mb-2" rows="2" placeholder="Send a reminder to the buyer..."></textarea><button class="btn btn-warning">Send reminder</button></form>
+      {% endif %}
+      {% if schedule.status == "PENDING" or schedule.status == "CONFIRMED" or schedule.status == "TIME_CHANGE_REQUESTED" %}
+        <form method="post">{% csrf_token %}<button name="action" value="cancel" class="btn btn-outline-danger">Cancel</button></form>
+      {% endif %}
+      {% if schedule.status == "CONFIRMED" %}
+        <form method="post">{% csrf_token %}<button name="action" value="complete" class="btn btn-primary">Mark pickup completed</button></form>
+      {% endif %}
+    </div>
+  </div></div>
+</div>
+{% endblock %}
